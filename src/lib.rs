@@ -1,16 +1,17 @@
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpResponse, HttpServer};
+use actix_web::dev::Server;
 
-async fn healthcheck_route() -> impl Responder{
+async fn healthcheck_route() -> HttpResponse {
     return HttpResponse::Ok().finish()
 }
 
-
-pub async fn run() -> Result<(), std::io::Error>{
-    HttpServer::new(||{
+pub fn run() -> Result<Server, std::io::Error>{
+    let server = HttpServer::new(||{
         App::new()
-        .route("/healthcheck", web::get().to(healthcheck_route))
+        .route("/health_check", web::get().to(healthcheck_route))
     })
     .bind("127.0.0.1:8000")?
-    .run()
-    .await
+    .run();
+
+    Ok(server)
 }
