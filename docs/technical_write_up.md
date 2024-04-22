@@ -3,6 +3,7 @@
 ## Routes
 
 - `health_check`: returns a HTTP code 200 if the server is up and running. Response body is empty.
+- `subscribe` returns a HTTP code 200 if the user successfully subscribed to our email newsletter service. 400 if data is missing or invalid.
 
 ## The `tokio` Async Runtime
 
@@ -20,3 +21,4 @@
 ## The Test Suite
 
 - The OS will find an available port for the test suite to use.
+- We use the same PostgreSQL database instance for both testing and production environment (might bite us in the ass later ?).

@@ -7,12 +7,15 @@ edition = "2021"
 
 [lib]
 path = "src/lib.rs"
+edition = "2021"
 
 [[bin]]
 path = "src/main.rs"
 name = "email_newsletter_api"
+edition = "2021"
 
 [dependencies]
 actix-web = "4.5.1"
 reqwest = "0.12.2"
+serde = { version = "1.0.197", features = ["derive"] }
 tokio = { version = "1.36.0", features = ["full"] }
