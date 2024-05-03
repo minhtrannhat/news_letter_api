@@ -11,7 +11,7 @@ pub fn spawn_app() -> String {
 
     let port = listener.local_addr().unwrap().port();
 
-    let server = email_newsletter_api::run(listener).expect("Failed to bind address");
+    let server = email_newsletter_api::startup::run(listener).expect("Failed to bind address");
 
     /* `tokio::spawn(/*async task*/)` will spawn an async task to be run.
     We can continue executing other code concurrently while `task` runs in the background.
