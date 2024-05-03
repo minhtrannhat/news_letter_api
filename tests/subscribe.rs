@@ -2,9 +2,20 @@ mod test_utils;
 
 use test_utils::spawn_app;
 
+use email_newsletter_api::configuration::{self, get_configuration};
+use sqlx::{Connection, PgConnection};
+
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
     let server_address = spawn_app();
+
+    let configuration = get_configuration().expect("Failed to read configuration");
+
+    let postgres_connection_string = configuration.database.connection_string();
+
+    let connection = PgConnection::connect(&postgres_connection_string)
+        .await
+        .expect("Failed to connect to Postgres");
 
     let client = reqwest::Client::new();
 
