@@ -22,3 +22,7 @@
 
 - The OS will find an available port for the test suite to use.
 - We use the same PostgreSQL database instance for both testing and production environment (might bite us in the ass later ?).
+
+## SQLx
+
+The SQLx library will run compile time checks to make sure our SQL queries are valid. This is done by running PostgreSQL queries during compile time. Therefore, it is important that DATABASE_URL must be properly set.

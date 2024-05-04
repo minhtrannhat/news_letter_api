@@ -1,9 +1,8 @@
 mod test_utils;
 
-use test_utils::spawn_app;
-
 use email_newsletter_api::configuration::{self, get_configuration};
 use sqlx::{Connection, PgConnection};
+use test_utils::spawn_app;
 
 #[tokio::test]
 async fn subscribe_returns_a_200_for_valid_form_data() {
@@ -13,7 +12,7 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
 
     let postgres_connection_string = configuration.database.connection_string();
 
-    let connection = PgConnection::connect(&postgres_connection_string)
+    let mut connection = PgConnection::connect(&postgres_connection_string)
         .await
         .expect("Failed to connect to Postgres");
 
@@ -31,6 +30,14 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
 
     assert!(response.status().is_success());
     assert_eq!(Some(0), response.content_length());
+
+    let saved = sqlx::query!("SELECT email, name FROM subscriptions")
+        .fetch_one(&mut connection)
+        .await
+        .expect("Failed to fetch saved subscribtions");
+
+    assert_eq!(saved.email, "le_test@gmail.com");
+    assert_eq!(saved.name, "le test");
 }
 
 #[tokio::test]
