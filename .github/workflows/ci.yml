@@ -20,9 +20,11 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install stable --profile minimal
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: ""
       - name: Migrate database
         run: |
           sudo apt-get install libpq-dev -y
