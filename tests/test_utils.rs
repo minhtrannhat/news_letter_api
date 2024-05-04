@@ -1,17 +1,31 @@
+use email_newsletter_api::configuration::{get_configuration, DatabaseSettings};
+use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
+use uuid::Uuid;
 
-#[allow(dead_code)]
+pub struct TestApp {
+    pub address: String,
+    pub db_pool: PgPool,
+}
+
 #[allow(clippy::let_underscore_future)]
-pub fn spawn_app() -> String {
+pub async fn spawn_app() -> TestApp {
     /* Spawn a app server with a TcpListener bound to localhost:<random port>
      *
      *  Returns a valid IPv4 string (i.e localhost:8080)
      */
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind to a random port");
 
+    let mut configuration = get_configuration().expect("Failed to read configuration");
+
+    configuration.database.database_name = Uuid::new_v4().to_string();
+
+    let db_conn_pool = configure_test_database(&configuration.database).await;
+
     let port = listener.local_addr().unwrap().port();
 
-    let server = email_newsletter_api::startup::run(listener).expect("Failed to bind address");
+    let server = email_newsletter_api::startup::run(listener, db_conn_pool.clone())
+        .expect("Failed to bind address");
 
     /* `tokio::spawn(/*async task*/)` will spawn an async task to be run.
     We can continue executing other code concurrently while `task` runs in the background.
@@ -20,5 +34,30 @@ pub fn spawn_app() -> String {
     (which `#[tokio::test]` will take care for us in the mean time).*/
     let _ = tokio::spawn(server);
 
-    format!("http://127.0.0.1:{}", port)
+    TestApp {
+        address: format!("http://127.0.0.1:{}", port),
+        db_pool: db_conn_pool,
+    }
+}
+
+pub async fn configure_test_database(db_config: &DatabaseSettings) -> PgPool {
+    let mut connection = PgConnection::connect(&db_config.connection_string_without_db())
+        .await
+        .expect("Failed to connect to Postgres");
+
+    connection
+        .execute(format!(r#"CREATE DATABASE "{}";"#, db_config.database_name).as_str())
+        .await
+        .expect("Failed to create database");
+
+    let conn_pool = PgPool::connect(&db_config.connection_string())
+        .await
+        .expect("Failed to connect to PostgreSQL pool");
+
+    sqlx::migrate!("./migrations")
+        .run(&conn_pool)
+        .await
+        .expect("Failed to migrate the database");
+
+    conn_pool
 }

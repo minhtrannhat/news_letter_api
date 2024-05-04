@@ -4,12 +4,12 @@ use test_utils::spawn_app;
 
 #[tokio::test]
 async fn health_check_works() {
-    let server_address = spawn_app();
+    let test_app = spawn_app().await;
 
     let client = reqwest::Client::new();
 
     let response = client
-        .get(&format!("{}/health_check", &server_address))
+        .get(&format!("{}/health_check", &test_app.address))
         .send()
         .await
         .expect("Failed to execute health_check request.");

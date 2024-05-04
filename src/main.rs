@@ -1,10 +1,15 @@
 use std::net::TcpListener;
 
 use email_newsletter_api::{configuration::get_configuration, startup};
+use sqlx::PgPool;
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
     let configuration = get_configuration().expect("Failed to read configuration");
+
+    let db_conn = PgPool::connect(&configuration.database.connection_string())
+        .await
+        .expect("Failed to connect to PostgreSQL");
 
     let port_number = configuration.application_port;
 
@@ -13,5 +18,5 @@ async fn main() -> Result<(), std::io::Error> {
 
     // Move the error up the call stack
     // otherwise await for the HttpServer
-    startup::run(listener)?.await
+    startup::run(listener, db_conn)?.await
 }

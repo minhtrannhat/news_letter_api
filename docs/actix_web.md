@@ -8,3 +8,5 @@ When we set up our web app, we can attach a resource to the app with `app_data`.
 
 In our app, we want to inject a `db_conn` to the route handlers, so that these routes can handle PostgreSQL read/write.
 
+Since the database connection is a TCP connection that is NOT `Clone`-able. We use Rust's `Arc` (Atomic Reference Counter) as a wrapper around this connection. Each instance of our web app, instead of getting a raw TCP connection to the PostgreSQL database, will be given the pointer to the memory region of `db_conn`.
+
