@@ -5,24 +5,9 @@
 - `health_check`: returns a HTTP code 200 if the server is up and running. Response body is empty.
 - `subscribe` returns a HTTP code 200 if the user successfully subscribed to our email newsletter service. 400 if data is missing or invalid.
 
-## The `tokio` Async Runtime
+## Other topics
 
-`tokio` will be the engine in charge of driving Futures to completion
-
-- `#[tokio::main]` macro is just a builder to help building the runtime. It is basically saying, we want this async function to be run.
-- `tokio::spawn(/*async task*/)` will spawn an async task to be run. We can continue executing other code concurrently while `task` runs in the background. If we need to wait for `task` to complete before proceeding, we can use `task.await` (which `#[tokio::test]` will take care for us in the mean time).
-
-### Testing with `tokio`
-
-- Each test has to be marked `#[tokio::test]`.
-- This macro will build a new async runtime for that one test.
-- By calling `spawn_app()`, we will get a API HttpServer running for the entire duration of the single test that the macro above belongs to.
-
-## The Test Suite
-
-- The OS will find an available port for the test suite to use.
-- We use the same PostgreSQL database instance for both testing and production environment (might bite us in the ass later ?).
-
-## SQLx
-
-The SQLx library will run compile time checks to make sure our SQL queries are valid. This is done by running PostgreSQL queries during compile time. Therefore, it is important that DATABASE_URL must be properly set.
+- [Database (PostgreSQL)](./database.md)
+- [Testing](./technical_write_up.md)
+- [Actic-web](./actix_web.md)
+- [tokio](./tokio.md)
