@@ -51,7 +51,8 @@ windows:
       panes:
         - lvim
   - test:
-      layout: main-vertical
+      layout: main-horizontal
       root: .
       panes:
-        - cargo watch -x check -x test -x run
+        - sleep 10 && cargo watch -x check -x test -x run
+        - ./scripts/init_db.sh
