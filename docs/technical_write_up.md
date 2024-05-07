@@ -7,6 +7,7 @@
 
 ## Other topics
 
+- [Tracing](./tracing.md)
 - [Database (PostgreSQL)](./database.md)
 - [Testing](./technical_write_up.md)
 - [Actic-web](./actix_web.md)
