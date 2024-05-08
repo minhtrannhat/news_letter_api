@@ -2,6 +2,7 @@ use std::net::TcpListener;
 
 use email_newsletter_api::telemetry::{get_subscriber, init_subscriber};
 use email_newsletter_api::{configuration::get_configuration, startup};
+use secrecy::ExposeSecret;
 use sqlx::PgPool;
 
 #[tokio::main]
@@ -15,7 +16,7 @@ async fn main() -> Result<(), std::io::Error> {
     );
     init_subscriber(subscriber);
 
-    let db_conn = PgPool::connect(&configuration.database.connection_string())
+    let db_conn = PgPool::connect(configuration.database.connection_string().expose_secret())
         .await
         .expect("Failed to connect to PostgreSQL");
 

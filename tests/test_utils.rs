@@ -3,6 +3,7 @@ use email_newsletter_api::{
     telemetry::{get_subscriber, init_subscriber},
 };
 use once_cell::sync::Lazy;
+use secrecy::ExposeSecret;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
@@ -57,16 +58,17 @@ pub async fn spawn_app() -> TestApp {
 }
 
 pub async fn configure_test_database(db_config: &DatabaseSettings) -> PgPool {
-    let mut connection = PgConnection::connect(&db_config.connection_string_without_db())
-        .await
-        .expect("Failed to connect to Postgres");
+    let mut connection =
+        PgConnection::connect(db_config.connection_string_without_db().expose_secret())
+            .await
+            .expect("Failed to connect to Postgres");
 
     connection
         .execute(format!(r#"CREATE DATABASE "{}";"#, db_config.database_name).as_str())
         .await
         .expect("Failed to create database");
 
-    let conn_pool = PgPool::connect(&db_config.connection_string())
+    let conn_pool = PgPool::connect(db_config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to PostgreSQL pool");
 
