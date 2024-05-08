@@ -1,7 +1,21 @@
-use email_newsletter_api::configuration::{get_configuration, DatabaseSettings};
+use email_newsletter_api::{
+    configuration::{get_configuration, DatabaseSettings},
+    telemetry::{get_subscriber, init_subscriber},
+};
+use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use uuid::Uuid;
+
+static TRACING: Lazy<()> = Lazy::new(|| {
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = get_subscriber("test".into(), "info".into(), std::io::stdout);
+        init_subscriber(subscriber);
+    } else {
+        let subscriber = get_subscriber("test".into(), "debug".into(), std::io::sink);
+        init_subscriber(subscriber);
+    }
+});
 
 pub struct TestApp {
     pub address: String,
@@ -10,6 +24,8 @@ pub struct TestApp {
 
 #[allow(clippy::let_underscore_future)]
 pub async fn spawn_app() -> TestApp {
+    Lazy::force(&TRACING);
+
     /* Spawn a app server with a TcpListener bound to localhost:<random port>
      *
      *  Returns a valid IPv4 string (i.e localhost:8080)

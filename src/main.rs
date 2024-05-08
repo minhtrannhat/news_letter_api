@@ -8,7 +8,11 @@ use sqlx::PgPool;
 async fn main() -> Result<(), std::io::Error> {
     let configuration = get_configuration().expect("Failed to read configuration");
 
-    let subscriber = get_subscriber("email_newsletter_api".into(), "info".into());
+    let subscriber = get_subscriber(
+        "email_newsletter_api".into(),
+        "info".into(),
+        std::io::stdout,
+    );
     init_subscriber(subscriber);
 
     let db_conn = PgPool::connect(&configuration.database.connection_string())
