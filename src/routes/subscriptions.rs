@@ -14,7 +14,6 @@ pub struct FormData {
     // functions args isn't really relevant to the span
     skip(form, db_conn_pool),
     fields(
-        request_id = %Uuid::new_v4(),
         subscriber_email = %form.email,
         subscriber_name = %form.name
     )
