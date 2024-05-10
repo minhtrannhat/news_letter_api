@@ -9,4 +9,12 @@
 - Run `cargo watch -x check -x test -x run` to lint, test and run the binary as soon as you make a change to the file.
 - Bonus: install and use `mold`, a very fast linker that can link your Rust binary _blazingly fast_.
 
+## Notable Dependencies
+
+- `actix-web`: Most popular Rust web framework
+- `serde`: Data structure serialization/deserialization
+- `tokio`: Async Runtime
+- `tracing`: Alternative to traditional logging
+- `sqlx`: SQL toolkit for Rust. Offers compile-time SQL checked queries
+
 ## [Technical Write Up](./docs/technical_write_up.md)
