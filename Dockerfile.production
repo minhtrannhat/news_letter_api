@@ -1,20 +1,43 @@
-# We use the latest Rust stable release as base image
-FROM rust:1.78.0
-# Let's switch our working directory to `app` (equivalent to `cd app`)
-# The `app` folder will be created for us by Docker in case it does not
-# exist already.
-WORKDIR /app
-# Install the required system dependencies for our linking configuration
-RUN apt update && apt install lld clang -y
+# Using the `rust-musl-builder` as base image, instead of 
+# the official Rust toolchain
+FROM clux/muslrust:stable AS chef
+USER root
 
-# Copy all files from our working environment to our Docker image
+RUN cargo install cargo-chef
+
+WORKDIR /app
+
+FROM chef AS planner
+
 COPY . .
-# Let's build our binary!
-# We'll use the release profile to make it faaaast
+
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+
+# Notice that we are specifying the --target flag!
+
+RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+
+COPY . .
+
 ENV SQLX_OFFLINE true
-RUN cargo build --release
+
+RUN cargo build --release --target x86_64-unknown-linux-musl --bin email_newsletter_api
+
+FROM alpine AS runtime
+
+WORKDIR /app
+
+RUN addgroup -S myuser && adduser -S myuser -G myuser
+
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/email_newsletter_api email_newsletter_api
+
+COPY configuration configuration
+
+USER myuser
 
 ENV APP_ENVIRONMENT production
 
-# When `docker run` is executed, launch the binary!
-ENTRYPOINT ["./target/release/email_newsletter_api"]
+ENTRYPOINT ["./email_newsletter_api"]
